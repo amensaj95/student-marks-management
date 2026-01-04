@@ -6,7 +6,7 @@
 
     <div>
         <p><strong>Total Students:</strong> <%= stats.total %> | 
-           <strong>Class Average:</strong> <%= stats.average ? stats.average.toFixed(2) : 0 %></p>
+        <strong>Class Average:</strong> <%= Number(stats.average).toFixed(2) %></p>
     </div>
 
     <form action="/" method="GET">
