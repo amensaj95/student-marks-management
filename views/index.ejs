@@ -1,34 +1,40 @@
 <!DOCTYPE html>
 <html>
+<head><title>Student Management</title></head>
 <body>
-    <h2>Student Marks Management</h2>
-    
-    <form action="/add-marks" method="POST">
-        <input type="text" name="student_name" placeholder="Name" required>
-        <input type="text" name="subject" placeholder="Subject" required>
-        <input type="number" name="score" placeholder="Marks" required>
-        <button type="submit">Add Student</button>
+    <h2>Student Marks Dashboard</h2>
+
+    <div>
+        <p><strong>Total Students:</strong> <%= stats.total %> | 
+           <strong>Class Average:</strong> <%= stats.average ? stats.average.toFixed(2) : 0 %></p>
+    </div>
+
+    <form action="/" method="GET">
+        <input type="text" name="search" placeholder="Search by name..." value="<%= searchQuery %>">
+        <button type="submit">Search</button>
+        <a href="/">Clear</a>
     </form>
 
     <hr>
 
-    <table border="1">
+    <form action="/add-marks" method="POST">
+        <input type="text" name="student_name" placeholder="Name" required>
+        <input type="text" name="subject" placeholder="Subject" required>
+        <input type="number" name="score" placeholder="Score" required>
+        <button type="submit">Save Marks</button>
+    </form>
+
+    <table border="1" style="margin-top: 20px; width: 100%;">
         <tr>
-            <th>Name</th>
-            <th>Subject</th>
-            <th>Marks</th>
-            <th>Grade</th>
-            <th>Action</th>
+            <th>Name</th><th>Subject</th><th>Score</th><th>Grade</th><th>Action</th>
         </tr>
-        <% students.forEach(student => { %>
+        <% students.forEach(s => { %>
         <tr>
-            <td><%= student.student_name %></td>
-            <td><%= student.subject %></td>
-            <td><%= student.score %></td>
-            <td><strong><%= student.grade %></strong></td>
-            <td>
-                <a href="/delete/<%= student.id %>">Delete</a>
-            </td>
+            <td><%= s.student_name %></td>
+            <td><%= s.subject %></td>
+            <td><%= s.score %></td>
+            <td><strong><%= s.grade %></strong></td>
+            <td><a href="/delete/<%= s.id %>">Delete</a></td>
         </tr>
         <% }) %>
     </table>
