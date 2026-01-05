@@ -6,7 +6,7 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// 1. Connection with your password 'qwerty'
+
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -22,7 +22,7 @@ db.connect((err) => {
     }
 });
 
-// 2. Home Route (Search, Filter, and Statistics)
+
 app.get('/', (req, res) => {
     const searchQuery = req.query.search || '';
     const gradeFilter = req.query.gradeFilter || '';
@@ -35,7 +35,7 @@ app.get('/', (req, res) => {
         params.push(gradeFilter);
     }
 
-    // FIXED: Using DISTINCT to count students correctly
+
     const statsSql = "SELECT AVG(score) AS average, COUNT(DISTINCT student_name) AS total FROM marks";
 
     db.query(listSql, params, (err, students) => {
@@ -54,7 +54,7 @@ app.get('/', (req, res) => {
     });
 });
 
-// 3. Add Record
+
 app.post('/add-marks', (req, res) => {
     const { student_name, subject, score } = req.body;
     const numericScore = parseInt(score);
@@ -72,7 +72,7 @@ app.post('/add-marks', (req, res) => {
     });
 });
 
-// 4. Delete Record
+
 app.get('/delete/:id', (req, res) => {
     db.query("DELETE FROM marks WHERE id = ?", [req.params.id], (err) => {
         if (err) throw err;
