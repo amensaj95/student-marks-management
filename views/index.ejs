@@ -1,42 +1,62 @@
 <!DOCTYPE html>
 <html>
-<head><title>Student Management</title></head>
+<head>
+    <title>Student Marks System</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
 <body>
-    <h2>Student Marks Dashboard</h2>
+    <div class="container">
+        <h2>Student Marks Management</h2>
 
-    <div>
-        <p><strong>Total Students:</strong> <%= stats.total %> | 
-        <strong>Class Average:</strong> <%= Number(stats.average).toFixed(2) %></p>
+        <div class="stats-bar">
+            <span><strong>Total Students:</strong> <%= stats.total %></span>
+            <span><strong>Class Average:</strong> <%= Number(stats.average).toFixed(2) %></span>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <form action="/" method="GET" style="display: flex; gap: 10px;">
+                <input type="text" name="search" placeholder="Search name..." value="<%= searchQuery %>">
+                <select name="gradeFilter" onchange="this.form.submit()">
+                    <option value="">All Grades</option>
+                    <option value="A" <%= selectedGrade === 'A' ? 'selected' : '' %>>Grade A</option>
+                    <option value="B" <%= selectedGrade === 'B' ? 'selected' : '' %>>Grade B</option>
+                    <option value="C" <%= selectedGrade === 'C' ? 'selected' : '' %>>Grade C</option>
+                    <option value="F" <%= selectedGrade === 'F' ? 'selected' : '' %>>Grade F</option>
+                </select>
+                <button type="submit">Filter</button>
+                <a href="/" style="padding-top:10px;">Clear</a>
+            </form>
+        </div>
+
+        <form action="/add-marks" method="POST" style="background: #f1f5f9; padding: 20px; border-radius: 8px;">
+            <input type="text" name="student_name" placeholder="Name" required>
+            <input type="text" name="subject" placeholder="Subject" required>
+            <input type="number" name="score" placeholder="Marks" required>
+            <button type="submit" style="background-color: var(--success);">+ Add Record</button>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Subject</th>
+                    <th>Score</th>
+                    <th>Grade</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% students.forEach(s => { %>
+                <tr>
+                    <td><%= s.student_name %></td>
+                    <td><%= s.subject %></td>
+                    <td><%= s.score %></td>
+                    <td><span class="grade grade-<%= s.grade %>"><%= s.grade %></span></td>
+                    <td><a href="/delete/<%= s.id %>" class="delete-btn" onclick="return confirm('Delete this record?')">Delete</a></td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
     </div>
-
-    <form action="/" method="GET">
-        <input type="text" name="search" placeholder="Search by name..." value="<%= searchQuery %>">
-        <button type="submit">Search</button>
-        <a href="/">Clear</a>
-    </form>
-
-    <hr>
-
-    <form action="/add-marks" method="POST">
-        <input type="text" name="student_name" placeholder="Name" required>
-        <input type="text" name="subject" placeholder="Subject" required>
-        <input type="number" name="score" placeholder="Score" required>
-        <button type="submit">Save Marks</button>
-    </form>
-
-    <table border="1" style="margin-top: 20px; width: 100%;">
-        <tr>
-            <th>Name</th><th>Subject</th><th>Score</th><th>Grade</th><th>Action</th>
-        </tr>
-        <% students.forEach(s => { %>
-        <tr>
-            <td><%= s.student_name %></td>
-            <td><%= s.subject %></td>
-            <td><%= s.score %></td>
-            <td><strong><%= s.grade %></strong></td>
-            <td><a href="/delete/<%= s.id %>">Delete</a></td>
-        </tr>
-        <% }) %>
-    </table>
 </body>
 </html>

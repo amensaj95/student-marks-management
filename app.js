@@ -6,6 +6,7 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+// 1. Connection with your password 'qwerty'
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -13,29 +14,47 @@ const db = mysql.createConnection({
     database: 'student_db'
 });
 
-// Home Route with Search and Statistics 📊
+db.connect((err) => {
+    if (err) {
+        console.error('❌ Connection Error:', err.message);
+    } else {
+        console.log('✅ Connected to MySQL!');
+    }
+});
+
+// 2. Home Route (Search, Filter, and Statistics)
 app.get('/', (req, res) => {
     const searchQuery = req.query.search || '';
+    const gradeFilter = req.query.gradeFilter || '';
     
-    // SQL to fetch students (filtered by search if provided)
-    const listSql = "SELECT * FROM marks WHERE student_name LIKE ?";
-    // SQL to calculate Class Average and Count
-    const statsSql = "SELECT AVG(score) AS average, COUNT(*) AS total FROM marks";
+    let listSql = "SELECT * FROM marks WHERE student_name LIKE ?";
+    let params = [`%${searchQuery}%`];
 
-    db.query(listSql, [`%${searchQuery}%`], (err, students) => {
-        if (err) throw err;
+    if (gradeFilter !== '') {
+        listSql += " AND grade = ?";
+        params.push(gradeFilter);
+    }
+
+    // FIXED: Using DISTINCT to count students correctly
+    const statsSql = "SELECT AVG(score) AS average, COUNT(DISTINCT student_name) AS total FROM marks";
+
+    db.query(listSql, params, (err, students) => {
+        if (err) { console.error(err); return res.send("DB Error"); }
+        
         db.query(statsSql, (err, stats) => {
-            if (err) throw err;
+            if (err) { console.error(err); return res.send("DB Error"); }
+            
             res.render('index', { 
                 students: students, 
-                stats: stats[0],
-                searchQuery: searchQuery 
+                stats: stats[0] || { average: 0, total: 0 },
+                searchQuery: searchQuery,
+                selectedGrade: gradeFilter 
             });
         });
     });
 });
 
-// Add/Update Marks Route 📝
+// 3. Add Record
 app.post('/add-marks', (req, res) => {
     const { student_name, subject, score } = req.body;
     const numericScore = parseInt(score);
@@ -44,6 +63,7 @@ app.post('/add-marks', (req, res) => {
     if (numericScore >= 90) grade = 'A';
     else if (numericScore >= 80) grade = 'B';
     else if (numericScore >= 70) grade = 'C';
+    else if (numericScore >= 60) grade = 'D';
 
     const sql = "INSERT INTO marks (student_name, subject, score, grade) VALUES (?, ?, ?, ?)";
     db.query(sql, [student_name, subject, numericScore, grade], (err) => {
@@ -52,7 +72,7 @@ app.post('/add-marks', (req, res) => {
     });
 });
 
-// Delete Route 🗑️
+// 4. Delete Record
 app.get('/delete/:id', (req, res) => {
     db.query("DELETE FROM marks WHERE id = ?", [req.params.id], (err) => {
         if (err) throw err;
@@ -60,4 +80,4 @@ app.get('/delete/:id', (req, res) => {
     });
 });
 
-app.listen(3000, () => console.log('Server running on http://localhost:3000'));
+app.listen(3000, () => console.log('🚀 Server running on http://localhost:3000'));
